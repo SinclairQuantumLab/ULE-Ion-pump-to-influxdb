@@ -119,9 +119,9 @@ try:
                 "measurement": "SPCe_IonPump",
                 "tags": {
                     "SN": SN,
-                    "model": spce_client.model or "",
-                    "version": spce_client.version or "",
-                    "IP": spce_client.IP,
+                    "model": spce_client._model or "",
+                    "version": spce_client._version or "",
+                    "IP": spce_client._IP,
                     "source": "Ethernet/Telnet",
                 },
                 "fields": {

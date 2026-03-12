@@ -73,14 +73,29 @@ class SPCeClient:
         read_timeout: float = 1.0,
     ) -> None:
         """Store connection settings."""
-        self.IP: str = IP
-        self.port: int = port
-        self.connect_timeout: float = connect_timeout
-        self.read_timeout: float = read_timeout
+        self._IP: str = IP
+        self._port: int = port
+        self._connect_timeout: float = connect_timeout
+        self._read_timeout: float = read_timeout
 
-        self.sock: socket.socket | None = None
-        self.model: str | None = None
-        self.version: str | None = None
+        self._sock: socket.socket | None = None
+        self._model: str | None = None
+        self._version: str | None = None
+
+        # read-only properties
+        @property
+        def IP(self) -> str: """Device IP address."""; return self._IP
+        @property
+        def port(self) -> int: """TCP port number."""; return self._port
+        @property
+        def connect_timeout(self) -> float: """Socket connect timeout in seconds."""; return self._connect_timeout
+        @property
+        def read_timeout(self) -> float: """Socket read timeout in seconds."""; return self._read_timeout
+        @property
+        def model(self) -> str | None: """Detected device model."""; return self._model
+        @property
+        def version(self) -> str | None: """Detected firmware version."""; return self._version
+        
 
     def __enter__(self) -> "SPCeClient":
         """Connect and return the client."""
@@ -98,52 +113,52 @@ class SPCeClient:
 
     def __str__(self) -> str:
         """Return a short summary of the client and connected device."""
-        if self.model is None and self.version is None:
+        if self._model is None and self._version is None:
             return (
-                f"SPCeClient(IP={self.IP}, port={self.port}, "
-                f"connected={self.sock is not None})"
+                f"SPCeClient(IP={self._IP}, port={self._port}, "
+                f"connected={self._sock is not None})"
             )
 
         return (
-            f"SPCeClient(model={self.model}, version={self.version}, "
-            f"IP={self.IP}, port={self.port}, connected={self.sock is not None})"
+            f"SPCeClient(model={self._model}, version={self._version}, "
+            f"IP={self._IP}, port={self._port}, connected={self._sock is not None})"
         )
 
     def connect(self) -> None:
         """Open the connection and read device info."""
-        if self.sock is not None:
+        if self._sock is not None:
             return
 
-        self.sock = socket.create_connection(
-            (self.IP, self.port),
-            timeout=self.connect_timeout,
+        self._sock = socket.create_connection(
+            (self._IP, self._port),
+            timeout=self._connect_timeout,
         )
-        self.sock.settimeout(self.read_timeout)
+        self._sock.settimeout(self.read_timeout)
 
         try:
-            self.model = self.get_model()
-            self.version = self.get_version()
+            self._model = self.get_model()
+            self._version = self.get_version()
         except Exception:
             self.close()
             raise
 
     def close(self) -> None:
         """Close the connection and clear cached info."""
-        if self.sock is not None:
-            self.sock.close()
-            self.sock = None
+        if self._sock is not None:
+            self._sock.close()
+            self._sock = None
 
-        self.model = None
-        self.version = None
+        self._model = None
+        self._version = None
 
     def send_raw(self, text: str, wait_time: float = 0.5) -> str:
         """Send one raw line and return the raw reply."""
-        if self.sock is None:
+        if self._sock is None:
             raise RuntimeError("Not connected. Call connect() first.")
 
-        self.sock.sendall((text + "\r\n").encode("ascii"))
+        self._sock.sendall((text + "\r\n").encode("ascii"))
         time.sleep(wait_time)
-        return self.sock.recv(4096).decode("ascii", errors="replace").strip()
+        return self._sock.recv(4096).decode("ascii", errors="replace").strip()
 
     def send_command(
         self,
