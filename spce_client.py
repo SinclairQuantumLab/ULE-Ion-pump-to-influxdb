@@ -82,19 +82,19 @@ class SPCeClient:
         self._model: str | None = None
         self._version: str | None = None
 
-        # read-only properties
-        @property
-        def IP(self) -> str: """Device IP address."""; return self._IP
-        @property
-        def port(self) -> int: """TCP port number."""; return self._port
-        @property
-        def connect_timeout(self) -> float: """Socket connect timeout in seconds."""; return self._connect_timeout
-        @property
-        def read_timeout(self) -> float: """Socket read timeout in seconds."""; return self._read_timeout
-        @property
-        def model(self) -> str | None: """Detected device model."""; return self._model
-        @property
-        def version(self) -> str | None: """Detected firmware version."""; return self._version
+    # read-only properties
+    @property
+    def IP(self) -> str: """Device IP address."""; return self._IP
+    @property
+    def port(self) -> int: """TCP port number."""; return self._port
+    @property
+    def connect_timeout(self) -> float: """Socket connect timeout in seconds."""; return self._connect_timeout
+    @property
+    def read_timeout(self) -> float: """Socket read timeout in seconds."""; return self._read_timeout
+    @property
+    def model(self) -> str | None: """Detected device model."""; return self._model
+    @property
+    def version(self) -> str | None: """Detected firmware version."""; return self._version
         
 
     def __enter__(self) -> "SPCeClient":
