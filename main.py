@@ -22,6 +22,22 @@ print("----- ULE chamber's GAMMA VACUUM SPCe ion pump controller -> InfluxDB upl
 print()
 
 
+# >>> App configuration >>>
+
+INTERVAL_s = 30
+EX_THRESHOLD = 3
+
+print(f"Polling interval = {INTERVAL_s} s, exception threshold = {EX_THRESHOLD}.")
+print()
+
+# <<< App configuration <<<
+
+# >>> load IMAQ config >>>
+import tomllib
+with open("imaq_config/auth.toml", "rb") as f:
+    AUTH = tomllib.load(f)
+# <<< load IMAQ config <<<
+
 # >>> SPCe connection >>>
 
 SPCE_IP = "192.168.1.50"
@@ -31,35 +47,18 @@ PRESSURE_UNIT = PressureUnit.TORR
 # <<< SPCe connection <<<
 
 
-# >>> loop configuration >>>
-
-INTERVAL_s = 5
-EX_THRESHOLD = 3
-
-print(f"Polling interval = {INTERVAL_s} s, exception threshold = {EX_THRESHOLD}.")
-print()
-
-# <<< loop configuration <<<
-
-
 # >>> InfluxDB configuration >>>
-
-INFLUXDB_URL = "http://synology-nas:8086"
-INFLUXDB_TOKEN = "xixuoRzjm51D2WQh5uHnqjd0H28NJuaKpiHAmmSzEUlqgUhxRl0A01Na6-a_gX6BENlP3xx8FEoGP-qMx0Xrow=="  # sinclairgroup_influxdb's admin token
-INFLUXDB_ORG = "sinclairgroup"
-INFLUXDB_BUCKET = "imaq"
-
-INFLUXDB_CLIENT = influxdb_client.InfluxDBClient(
-    url=INFLUXDB_URL,
-    token=INFLUXDB_TOKEN,
-    org=INFLUXDB_ORG,
-)
+import influxdb_client
+from influxdb_client.client.write_api import SYNCHRONOUS
+# Initialize the InfluxDB Client and the Write API
+INFLUXDB_CLIENT = influxdb_client.InfluxDBClient(**AUTH["influxdb"])
 INFLUXDB_WRITE_API = INFLUXDB_CLIENT.write_api(write_options=SYNCHRONOUS)
-
+INFLUXDB_QUERY_API = INFLUXDB_CLIENT.query_api()
+INFLUXDB_ORG = AUTH["influxdb"]["org"]; INFLUXDB_BUCKET = AUTH["influxdb"]["bucket"]
 print(f"InfluxDB client initialized for org='{INFLUXDB_ORG}', bucket='{INFLUXDB_BUCKET}'.")
 print()
-
 # <<< InfluxDB configuration <<<
+
 
 
 def connect_spce() -> SPCeClient:
